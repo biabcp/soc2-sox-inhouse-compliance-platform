@@ -1,5 +1,3 @@
-Here’s what a single SOC 2 control file could look like:
-
 # controls/soc2/cc6_1.yml
 id: "SOC2-CC6.1"
 name: "Logical Access Controls"
