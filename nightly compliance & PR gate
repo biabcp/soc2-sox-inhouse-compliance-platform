@@ -1,0 +1,39 @@
+# .github/workflows/nightly-compliance.yml
+name: Nightly Compliance Checks
+
+on:
+  schedule:
+    - cron: "0 3 * * *"  # 3 AM UTC daily
+  workflow_dispatch:
+
+jobs:
+  run-compliance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: |
+          pip install -r requirements.txt
+
+      - name: Collect GitHub evidence
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT_COMPLIANCE }}
+          GITHUB_ORG: "fictional-org"
+        run: |
+          python src/collectors/github_collector.py
+
+      - name: Evaluate controls
+        run: |
+          python src/evaluators/control_engine.py > compliance_results.json
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: compliance-results
+          path: compliance_results.json
